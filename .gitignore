@@ -1,0 +1,70 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+env/
+
+# Package files
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Python environment files
+*.env
+*.venv
+*.env.*
+*.venv.*
+.envrc
+
+# Database files
+*.sqlite3
+*.db
+
+# Logs
+*.log
+*.pid
+*.out
+*.err
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Cache files
+*.cache
+*.pytest_cache/
+*.mypy_cache/
+.pytest_cache/
+.mypy_cache/
+
+# Coverage reports
+htmlcov/
+coverage.xml
+*.cover
+*.coverage
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# IDE specific files
+.vscode/
+.idea/
+*.iml
+
+# MacOS specific files
+.DS_Store
+
+# Node.js (for frontend development)
+node_modules/
+package-lock.json
+
+# Miscellaneous
+Thumbs.db
