@@ -6,3 +6,4 @@ sqlalchemy
 asyncpg
 matplotlib
 seaborn
+python-multipart
