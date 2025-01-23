@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from app.services.supabase_client import get_data
+from app.utils.data_normalization import normalize_column, normalize_term, normalize_emp_length
 
 # Set the matplotlib backend to a non-GUI backend
 matplotlib.use("Agg")  # This ensures plots are not rendered visually
@@ -107,10 +108,6 @@ async def state_wise_defaults():
         "lowest_default_rate": lowest_default_rate.to_dict(),
     }
 
-import re
-import pandas as pd
-from app.services.supabase_client import get_data
-
 async def risk_factors_analysis():
     """Analyze factors contributing to high-default loans."""
     # Fetch data from Supabase
@@ -121,49 +118,26 @@ async def risk_factors_analysis():
     if "is_bad" not in df:
         raise ValueError("Column 'is_bad' is missing in the dataset.")
 
-    # Ensure 'is_bad' is numeric
-    df["is_bad"] = pd.to_numeric(df["is_bad"], errors="coerce").fillna(0).astype(int)
+    # Normalize 'is_bad' column
+    df["is_bad"] = normalize_column(df, "is_bad", dtype="int")
 
-    # Normalize the 'term' column
+    # Normalize other columns
     if "term" in df.columns:
-        def normalize_term(value):
-            """Normalize term values to months."""
-            if pd.isnull(value):
-                return None
-            value = value.strip().lower()
-            match = re.search(r"(\d+)", value)
-            if not match:
-                return None
-            numeric_value = int(match.group(1))
-            return numeric_value * 12 if "year" in value else numeric_value
-
         df["term"] = df["term"].apply(normalize_term).fillna(0).astype(float)
 
-    # Clean up `grade` and `sub_grade`
     if "grade" in df.columns:
         df["grade"] = df["grade"].str.strip().fillna("Unknown")
+
     if "sub_grade" in df.columns:
         df["sub_grade"] = df["sub_grade"].str.strip().fillna("Unknown")
 
-    # Normalize `emp_length`
     if "emp_length" in df.columns:
-        def normalize_emp_length(value):
-            """Convert employment length to numeric values."""
-            if pd.isnull(value):
-                return 0
-            if "10+" in value:
-                return 10
-            if "< 1" in value:
-                return 0.5
-            match = re.search(r"(\d+)", value)
-            return float(match.group(1)) if match else 0
-
         df["emp_length"] = df["emp_length"].apply(normalize_emp_length)
 
     # Ensure numeric columns are used for correlation
     numeric_columns = df.select_dtypes(include=["number"]).columns
 
-    # Ensure all numeric columns have valid values (e.g., replace NaN with 0)
+    # Ensure all numeric columns have valid values
     df[numeric_columns] = df[numeric_columns].fillna(0)
 
     # Calculate correlations with 'is_bad'
