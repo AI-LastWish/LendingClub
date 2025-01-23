@@ -17,23 +17,23 @@ TABLE_SCHEMA = {
     "loan_amnt": float,
     "funded_amnt": float,
     "term": str,
-    "int_rate": float,
+    "int_rate": float,  # Stored as decimal(10, 4) in DB
     "installment": float,
     "grade": str,
     "sub_grade": str,
     "emp_title": str,
     "emp_length": str,
     "home_ownership": str,
-    "annual_inc": float,
+    "annual_inc": float,  # Stored as decimal(15, 2) in DB
     "verification_status": str,
     "pymnt_plan": str,
     "url": str,
-    "description": str,
+    "desc": str,  # Matches escaped column name in DB
     "purpose": str,
     "title": str,
     "zip_code": str,
     "addr_state": str,
-    "dti": float,
+    "dti": float,  # Stored as decimal(10, 2) in DB
     "delinq_2yrs": int,
     "earliest_cr_line": str,
     "inq_last_6mths": int,
@@ -41,8 +41,8 @@ TABLE_SCHEMA = {
     "mths_since_last_record": int,
     "open_acc": int,
     "pub_rec": int,
-    "revol_bal": float,
-    "revol_util": float,
+    "revol_bal": float,  # Stored as decimal(15, 2) in DB
+    "revol_util": float,  # Stored as decimal(10, 4) in DB
     "total_acc": int,
     "initial_list_status": str,
     "mths_since_last_major_derog": int,

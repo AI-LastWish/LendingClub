@@ -1,5 +1,6 @@
 import httpx
 import logging
+import pandas as pd  # Ensure pandas is imported
 
 from app.config import SUPABASE_URL, SUPABASE_API_KEY
 
@@ -26,9 +27,12 @@ async def insert_data(table_name, rows):
     # Fetch table columns from Supabase
     table_columns = await get_table_columns(table_name)
     logger.info(f"Supabase table columns: {table_columns}")
+    if not table_columns:
+        raise ValueError(f"Could not fetch column names for table '{table_name}'. Ensure the table exists.")
 
     # Clean rows to remove unsupported fields
     cleaned_rows = [clean_row(row, table_columns) for row in rows]
+    logger.info(f"Cleaned rows: {cleaned_rows[:5]}")  # Log the first 5 cleaned rows
 
     headers = {
         "apikey": SUPABASE_API_KEY,
@@ -48,33 +52,41 @@ async def insert_data(table_name, rows):
             response.raise_for_status()
 
 async def get_table_columns(table_name):
-    """Retrieve the list of columns for a given table from Supabase."""
+    """Fetch table columns using the OpenAPI schema from Supabase REST server."""
     headers = {
         "apikey": SUPABASE_API_KEY,
         "Authorization": f"Bearer {SUPABASE_API_KEY}",
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{SUPABASE_URL}/rest/v1/{table_name}?select=*&limit=1",
-            headers=headers,
-        )
-        if response.status_code != 200:
-            logger.error(f"Failed to fetch table columns: {response.text}")
-            raise ValueError("Failed to fetch table columns.")
-        # Extract column names from the response keys
-        return list(response.json()[0].keys()) if response.json() else []
+        response = await client.get(f"{SUPABASE_URL}/rest/v1/", headers=headers)
+
+        if response.status_code == 200:
+            try:
+                openapi_data = response.json()
+                definitions = openapi_data.get("definitions", {})
+                if table_name in definitions:
+                    # Extract column names from the table definition
+                    table_properties = definitions[table_name].get("properties", {})
+                    return list(table_properties.keys())
+                else:
+                    logger.error(f"Table '{table_name}' not found in OpenAPI schema definitions.")
+                    return []
+            except Exception as e:
+                logger.error(f"Error parsing OpenAPI response: {e}")
+                return []
+        else:
+            logger.error(f"Failed to fetch OpenAPI schema: {response.status_code}, {response.text}")
+            return []
     
 def clean_row(row, table_columns):
-    """Remove keys not in the Supabase table schema and rename keys if needed."""
-    # Map 'desc' to 'description'
-    key_map = {'desc': 'description'}
+    """Remove keys not in the Supabase table schema."""
     cleaned_row = {}
     for key, value in row.items():
-        # Rename or drop keys not in the table schema
-        mapped_key = key_map.get(key, key)
-        if mapped_key in table_columns:
-            cleaned_row[mapped_key] = value
+        # Only include keys that exist in the table schema
+        if key in table_columns:
+            # Ensure value compatibility (e.g., replace NaN or None with default)
+            cleaned_row[key] = value if pd.notnull(value) else None
     return cleaned_row
 
 
