@@ -6,6 +6,7 @@ from app.analysis.analysis_functions import (
     state_wise_defaults,
     risk_factors_analysis,
     temporal_default_trends,
+    generate_final_report,  # Import the report function
 )
 
 router = APIRouter()
@@ -29,3 +30,8 @@ async def risk_factors():
 @router.get("/temporal-trends")
 async def temporal_trends():
     return await temporal_default_trends()
+
+@router.get("/report")
+async def report():
+    """Generate and return the final analysis report."""
+    return await generate_final_report()

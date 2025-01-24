@@ -14,10 +14,6 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# Debugging: Print Supabase variables
-print(f"SUPABASE_URL: {SUPABASE_URL}")
-print(f"SUPABASE_API_KEY: {SUPABASE_API_KEY}")
-
 async def insert_data(table_name, rows):
     """Insert data into a Supabase table."""
     if not SUPABASE_URL or not SUPABASE_API_KEY:
@@ -90,13 +86,31 @@ def clean_row(row, table_columns):
     return cleaned_row
 
 
-async def get_data(table: str, filters: str = ""):
-    """Get data from a Supabase table with optional filters."""
+async def get_data(table: str, filters: str = "", page_size: int = 1000):
+    """Get all data from a Supabase table with optional filters, handling pagination."""
+    all_data = []
+    offset = 0  # Start from the first record
+
     async with httpx.AsyncClient() as client:
-        url = f"{SUPABASE_URL}/rest/v1/{table}?{filters}"
-        response = await client.get(url, headers=HEADERS)
-        response.raise_for_status()
-        return response.json()
+        while True:
+            # Append pagination parameters to the URL
+            pagination = f"&offset={offset}&limit={page_size}"
+            url = f"{SUPABASE_URL}/rest/v1/{table}?{filters}{pagination}"
+            response = await client.get(url, headers=HEADERS)
+            response.raise_for_status()
+            
+            # Parse the current batch of data
+            current_data = response.json()
+            all_data.extend(current_data)
+
+            # Break if there are no more records to fetch
+            if len(current_data) < page_size:
+                break
+
+            # Increment the offset to fetch the next batch
+            offset += page_size
+
+    return all_data
 
 async def update_data(table: str, filters: str, data: dict):
     """Update data in a Supabase table."""
