@@ -323,16 +323,11 @@ async def temporal_default_trends():
         "summary": summary,
     }
 
-async def generate_final_report():
+async def generate_final_report(
+    loan_distribution, grade_defaults, state_defaults, risk_factors, temporal_trends
+):
     """Generate a single analysis report with a final summary and one visualization."""
     try:
-        # Fetch individual analyses
-        loan_distribution = await analyze_loan_amount_distribution()
-        grade_defaults = await grade_vs_defaults()
-        state_defaults = await state_wise_defaults()
-        risk_factors = await risk_factors_analysis()
-        temporal_trends = await temporal_default_trends()
-
         # Combine key findings for ChatGPT prompt
         findings = (
             f"Loan Distribution Summary: {loan_distribution['summary']}\n\n"
@@ -344,9 +339,15 @@ async def generate_final_report():
 
         # Create a single visualization summarizing key findings
         # Example: Comparing most significant risk factors
-        df_risk_factors = pd.DataFrame(risk_factors["most_correlated"].items(), columns=["Factor", "Correlation"])
+        df_risk_factors = pd.DataFrame(
+            risk_factors["most_correlated"].items(), columns=["Factor", "Correlation"]
+        )
         plt.figure(figsize=(10, 6))
-        plt.barh(df_risk_factors["Factor"], df_risk_factors["Correlation"], color="skyblue")
+        plt.barh(
+            df_risk_factors["Factor"],
+            df_risk_factors["Correlation"],
+            color="skyblue",
+        )
         plt.title("Top Risk Factors Associated with Loan Defaults")
         plt.xlabel("Correlation with Defaults")
         plt.ylabel("Risk Factor")

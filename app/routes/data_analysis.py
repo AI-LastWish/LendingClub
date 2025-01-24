@@ -1,37 +1,47 @@
 # app/routes/data_analysis.py
-from fastapi import APIRouter
-from app.analysis.analysis_functions import (
-    analyze_loan_amount_distribution,
-    grade_vs_defaults,
-    state_wise_defaults,
-    risk_factors_analysis,
-    temporal_default_trends,
-    generate_final_report,  # Import the report function
-)
+from fastapi import APIRouter, HTTPException
+from app.analysis.cache import cache
 
 router = APIRouter()
 
 @router.get("/loan-distribution")
 async def loan_distribution():
-    return await analyze_loan_amount_distribution()
+    """Fetch precomputed loan distribution analysis from the cache."""
+    if "loan_distribution" in cache:
+        return cache["loan_distribution"]
+    raise HTTPException(status_code=500, detail="Loan distribution data is not available in the cache.")
 
 @router.get("/grade-defaults")
 async def grade_defaults():
-    return await grade_vs_defaults()
+    """Fetch precomputed grade defaults analysis from the cache."""
+    if "grade_defaults" in cache:
+        return cache["grade_defaults"]
+    raise HTTPException(status_code=500, detail="Grade defaults data is not available in the cache.")
 
 @router.get("/state-defaults")
 async def state_defaults():
-    return await state_wise_defaults()
+    """Fetch precomputed state defaults analysis from the cache."""
+    if "state_defaults" in cache:
+        return cache["state_defaults"]
+    raise HTTPException(status_code=500, detail="State defaults data is not available in the cache.")
 
 @router.get("/risk-factors")
 async def risk_factors():
-    return await risk_factors_analysis()
+    """Fetch precomputed risk factors analysis from the cache."""
+    if "risk_factors" in cache:
+        return cache["risk_factors"]
+    raise HTTPException(status_code=500, detail="Risk factors data is not available in the cache.")
 
 @router.get("/temporal-trends")
 async def temporal_trends():
-    return await temporal_default_trends()
+    """Fetch precomputed temporal trends analysis from the cache."""
+    if "temporal_trends" in cache:
+        return cache["temporal_trends"]
+    raise HTTPException(status_code=500, detail="Temporal trends data is not available in the cache.")
 
 @router.get("/report")
 async def report():
-    """Generate and return the final analysis report."""
-    return await generate_final_report()
+    """Fetch the precomputed final analysis report from the cache."""
+    if "final_report" in cache:
+        return cache["final_report"]
+    raise HTTPException(status_code=500, detail="Final report is not available in the cache.")
