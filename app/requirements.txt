@@ -6,4 +6,5 @@ sqlalchemy
 asyncpg
 matplotlib
 seaborn
+httpx
 python-multipart
