@@ -7,4 +7,5 @@ asyncpg
 matplotlib
 seaborn
 httpx
+python-dotenv
 python-multipart
