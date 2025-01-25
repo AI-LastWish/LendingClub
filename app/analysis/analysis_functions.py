@@ -263,25 +263,41 @@ async def temporal_default_trends():
     data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
 
-    if "earliest_cr_line" not in df or "is_bad" not in df:
+    # Ensure required columns exist
+    if "earliest_cr_line" not in df.columns or "is_bad" not in df.columns:
         raise ValueError("Columns 'earliest_cr_line' or 'is_bad' are missing in the dataset.")
 
-    # Ensure consistent date parsing
+    # Convert 'earliest_cr_line' to datetime
     try:
-        df["earliest_cr_line"] = pd.to_datetime(df["earliest_cr_line"], format="%m/%d/%Y", errors="coerce")
-    except ValueError:
-        df["earliest_cr_line"] = pd.to_datetime(df["earliest_cr_line"], errors="coerce")
+        # Handle two-digit years as '%y' and specify the format
+        df["earliest_cr_line"] = pd.to_datetime(
+            df["earliest_cr_line"],
+            format="%m/%d/%y",  # Matches the provided format
+            errors="coerce"     # Coerce invalid dates to NaT
+        )
+    except Exception as e:
+        raise ValueError(f"Error parsing 'earliest_cr_line': {e}")
 
-    # Extract the year from 'earliest_cr_line'
+    # Drop rows with invalid or missing dates
+    df = df[df["earliest_cr_line"].notnull()]
+    if df.empty:
+        raise ValueError("No valid dates in 'earliest_cr_line'. The dataset is empty after filtering.")
+
+    # Extract year from 'earliest_cr_line'
     df["issue_year"] = df["earliest_cr_line"].dt.year
+    if df["issue_year"].isnull().all():
+        raise ValueError("No valid years could be extracted from 'earliest_cr_line'.")
 
-    # Filter rows with valid years
-    df = df[df["issue_year"].notnull()]
+    # Filter data where 'is_bad' is True
+    if not df["is_bad"].any():
+        raise ValueError("No rows with 'is_bad == True'. The dataset contains no loan defaults.")
+    yearly_defaults = df[df["is_bad"]].groupby("issue_year").size()
 
-    # Group by year and calculate default counts
-    yearly_defaults = df[df["is_bad"] == 1].groupby("issue_year").size()
+    # Check if data exists for plotting
+    if yearly_defaults.empty:
+        raise ValueError("No default data available for plotting. Check the dataset for missing or invalid data.")
 
-    # Visualization
+    # Plot yearly default trends
     plt.figure(figsize=(10, 6))
     yearly_defaults.plot(kind="line", marker="o", color="blue")
     plt.title("Yearly Default Trends")
@@ -289,20 +305,20 @@ async def temporal_default_trends():
     plt.ylabel("Number of Defaults")
     plt.tight_layout()
 
-    # Save to base64 image
+    # Save the plot as a base64 image
     buffer = io.BytesIO()
     plt.savefig(buffer, format="png")
     buffer.seek(0)
     encoded_image = base64.b64encode(buffer.read()).decode("utf-8")
     buffer.close()
-    plt.close()  # Close the plot to free memory
+    plt.close()
 
-    # Generate a summary using ChatGPT
+    # Prepare statistics for summary generation
     statistics = {
         "yearly_defaults": yearly_defaults.to_dict()
     }
 
-    # Prepare the prompt for ChatGPT
+    # Generate summary using ChatGPT
     prompt = (
         f"The dataset contains yearly trends in loan defaults based on the column 'earliest_cr_line'.\n\n"
         f"Yearly Default Counts:\n{yearly_defaults.to_string()}\n\n"
