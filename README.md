@@ -16,8 +16,8 @@ To run this project locally, ensure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/lendingclub-backend.git
-   cd lendingclub-backend
+   git clone https://github.com/AI-LastWish/LendingClub.git
+   cd LendingClub
    ```
 2. Create and activate a virtual environment (optional but recommended):
    ```bash
@@ -26,28 +26,17 @@ To run this project locally, ensure you have the following installed:
    ```
 3. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install -r app/requirements.txt
    ```
 
 ### Running the Development Server
 
 Start the Flask development server:
 ```bash
-flask run
+uvicorn app.main:app --reload
 ```
 
-By default, the server will run on [http://127.0.0.1:5000](http://127.0.0.1:5000).
-
-### Running Tests
-
-To run the test suite:
-```bash
-pytest
-```
-
-Ensure all tests pass before pushing code changes.
-
----
+By default, the server will run on [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ## API Endpoints
 
