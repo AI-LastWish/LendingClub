@@ -7,6 +7,7 @@ import os
 from app.utils.chatgpt import generate_summary
 from app.services.supabase_client import get_data
 from app.utils.data_normalization import normalize_column, normalize_term, normalize_emp_length
+from app.constants.database import TABLE_NAME  # Import TABLE_NAME from constants
 
 # Set the matplotlib backend to a non-GUI backend
 matplotlib.use("Agg")  # This ensures plots are not rendered visually
@@ -15,7 +16,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 async def analyze_loan_amount_distribution():
     """Analyze and visualize the distribution of loan amounts and generate a summary."""
-    data = await get_data("lending_club_loans")
+    data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
     
     if "loan_amnt" not in df:
@@ -65,7 +66,7 @@ async def analyze_loan_amount_distribution():
 async def grade_vs_defaults():
     """Identify which loan grade is most frequently associated with defaults and generate a summary."""
     # Fetch data
-    data = await get_data("lending_club_loans")
+    data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
 
     # Check for required columns
@@ -114,7 +115,7 @@ async def grade_vs_defaults():
 
 async def state_wise_defaults():
     """Evaluate state-wise loan distributions and default rates."""
-    data = await get_data("lending_club_loans")
+    data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
 
     if "addr_state" not in df or "is_bad" not in df:
@@ -169,7 +170,7 @@ async def state_wise_defaults():
 async def risk_factors_analysis():
     """Analyze factors contributing to high-default loans."""
     # Fetch data from Supabase
-    data = await get_data("lending_club_loans")
+    data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
 
     # Check for required columns
@@ -259,7 +260,7 @@ async def risk_factors_analysis():
 
 async def temporal_default_trends():
     """Analyze temporal trends in loan defaults."""
-    data = await get_data("lending_club_loans")
+    data = await get_data(TABLE_NAME)
     df = pd.DataFrame(data)
 
     if "earliest_cr_line" not in df or "is_bad" not in df:

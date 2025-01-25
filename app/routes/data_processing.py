@@ -4,14 +4,13 @@ import pandas as pd
 from io import StringIO
 import simplejson as json  # Use simplejson for better NaN handling
 import logging
+from app.constants.database import TABLE_NAME  # Import TABLE_NAME from constants
 
 # Initialize logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-TABLE_NAME = "lending_club_loans"
 
 TABLE_SCHEMA = {
     "loan_amnt": float,

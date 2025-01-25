@@ -1,0 +1,1 @@
+TABLE_NAME = "lending_club_loans"
