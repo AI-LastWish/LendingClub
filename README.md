@@ -40,16 +40,35 @@ By default, the server will run on [http://127.0.0.1:8000](http://127.0.0.1:8000
 
 ## API Endpoints
 
-### `/api/default-trends` [GET]
-- **Description**: Returns yearly trends of loan defaults.
-- **Query Parameters**:
-  - `start_year`: (optional) Filter results starting from this year.
-  - `end_year`: (optional) Filter results ending at this year.
-- **Response**: JSON object containing default trends by year.
-
-### `/api/loan-distribution` [GET]
-- **Description**: Returns the distribution of loan amounts.
+### `api/data_analysis/loan-distribution` [GET]
+- **Description**: Fetches the distribution of loan amounts.
 - **Response**: JSON object containing loan amount ranges and counts.
+- **Error Response**: Returns a 500 status code if the loan distribution data is not available in the cache.
+
+### `/api/data_analysis/grade-defaults` [GET]
+- **Description**: Fetches the default rates by loan grade.
+- **Response**: JSON object containing default rates by grade.
+- **Error Response**: Returns a 500 status code if grade defaults data is not available in the cache.
+
+### `/api/data_analysis/state-defaults` [GET]
+- **Description**: Fetches the default rates by state.
+- **Response**: JSON object containing default rates by state.
+- **Error Response**: Returns a 500 status code if state defaults data is not available in the cache.
+
+### `/api/data_analysis/risk-factors` [GET]
+- **Description**: Fetches analysis of risk factors influencing loan defaults.
+- **Response**: JSON object containing risk factors and their impact.
+- **Error Response**: Returns a 500 status code if risk factors data is not available in the cache.
+
+### `/api/data_analysis/temporal-trends` [GET]
+- **Description**: Fetches temporal trends of loan defaults over time.
+- **Response**: JSON object containing temporal trends data.
+- **Error Response**: Returns a 500 status code if temporal trends data is not available in the cache.
+
+### `/api/data_analysis/report` [GET]
+- **Description**: Fetches the final analysis report.
+- **Response**: JSON object containing the final report summary and details.
+- **Error Response**: Returns a 500 status code if the final report is not available in the cache.
 
 ---
 
