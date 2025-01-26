@@ -28,6 +28,8 @@ To run this project locally, ensure you have the following installed:
    ```bash
    pip install -r app/requirements.txt
    ```
+4. Configure environment variables:
+   Rename the .example-env to .env and add your key
 
 ### Running the Development Server
 
